@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(Drawer))]
 public class CanvasManager : MonoBehaviour
 {
+    public GameObject UIcontainer;
     public BrushPaletteUI brushPalette;
     public Drawable drawingCanvas;
     public Drawer drawingAgent;
@@ -53,6 +54,15 @@ public class CanvasManager : MonoBehaviour
 
     public void SaveCurrentCanvas()
     {
-        drawingCanvas.SaveImage();
+        //drawingCanvas.SaveImage();
+        StartCoroutine(TakeScreenshot());
+    }
+
+    private IEnumerator TakeScreenshot()
+    {
+        UIcontainer.SetActive(false);
+        yield return new WaitForEndOfFrame();
+        ScreenCapture.CaptureScreenshot("savedScreen.png");
+        UIcontainer.SetActive(true);
     }
 }
