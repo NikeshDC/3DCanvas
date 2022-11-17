@@ -2408,6 +2408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8217e7f6adb0504f80ebcf4e223047d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UIcontainer: {fileID: 1985112910}
   brushPalette: {fileID: 1985112915}
   drawingCanvas: {fileID: 1694417014}
   drawingAgent: {fileID: 0}
