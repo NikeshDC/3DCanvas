@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 
 [RequireComponent(typeof(Renderer))]
+[RequireComponent(typeof(MeshCollider))]
 public class Drawable : MonoBehaviour
 {
     /*naming convention:- 'brush' is what is used to draw and 'canvas' is where it is drawn
@@ -24,7 +25,8 @@ public class Drawable : MonoBehaviour
 
     Renderer canvasRenderer; //the renderer component of the gameobject which draws the texture
     Texture2D canvasTexture; //the texture where the actaul pixels are drawn
-    [SerializeField] private int textureSize = 1024;
+    [SerializeField] private int textureSizeX = 1024;
+    [SerializeField] private int textureSizeY = 1024;
 
     public static string Tag = "DrawableCanvas";  //tag the gameobject that uses Drawable script
     private bool canvasUpdateRequired = false; //set to true whenever something is drawn and canvas is required to be re-rendered
@@ -34,7 +36,25 @@ public class Drawable : MonoBehaviour
     void Start()
     {
         canvasRenderer = GetComponent<Renderer>();
-        canvasTexture = new Texture2D(textureSize, textureSize);
+
+        if (canvasRenderer.material.mainTexture == null)
+        {//if there is no texture in the material create one else use the pre-existing material
+            canvasTexture = new Texture2D(textureSizeX, textureSizeY);
+        }
+        else
+        {
+            if (canvasRenderer.material.mainTexture is Texture2D)
+            {
+                Texture2D existingTexture = (Texture2D)canvasRenderer.material.mainTexture;
+                textureSizeX = existingTexture.width;
+                textureSizeY = existingTexture.height;
+                canvasTexture = new Texture2D(existingTexture.width, existingTexture.height);
+                canvasTexture.SetPixels32(existingTexture.GetPixels32());
+                canvasTexture.Apply();
+            }
+            else
+                Debug.LogError("Provided texture is not of type Texture2D");
+        }
         canvasRenderer.material.mainTexture = canvasTexture;
 
         brushCoords = new List<Vector2Int>();
@@ -126,7 +146,7 @@ public class Drawable : MonoBehaviour
         {
             pixx = brushCoord.x + brushPosition.x;
             pixy = brushCoord.y + brushPosition.y;
-            if (pixx >= 0 && pixy >= 0 && pixx < textureSize && pixy < textureSize)
+            if (pixx >= 0 && pixy >= 0 && pixx < textureSizeX && pixy < textureSizeY)
                 canvasTexture.SetPixel(pixx, pixy, brushColor);
         }
 
@@ -141,7 +161,7 @@ public class Drawable : MonoBehaviour
         {
             pixx = brushCoord.x + x;
             pixy = brushCoord.y + y;
-            if (pixx >= 0 && pixy >= 0 && pixx < textureSize && pixy < textureSize)
+            if (pixx >= 0 && pixy >= 0 && pixx < textureSizeX && pixy < textureSizeY)
             {
                 canvasTexture.SetPixel(pixx, pixy, brushColor);
                 //**Debug.Log("Pixel set at ("+pixx+", "+pixy+")");
@@ -152,7 +172,7 @@ public class Drawable : MonoBehaviour
     }
 
     private IEnumerator UpdateCanvas()
-    { //check after fixed interval if update is required for performance reason
+    { //check after fixed interval if update is required (for performance reason)
       //i.e. call to Texture2D.Apply() should be infrequent 
         while (true)
         {
@@ -165,8 +185,11 @@ public class Drawable : MonoBehaviour
         }
     }
 
-    public int GetTextureSize()
-    { return textureSize; }
+    public int GetTextureSizeX()
+    { return textureSizeX; }
+
+    public int GetTextureSizeY()
+    { return textureSizeY; }
 
     public void SaveImage(string fileName = "SavedImage.png")
     {

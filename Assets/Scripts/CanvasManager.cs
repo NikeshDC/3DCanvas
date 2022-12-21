@@ -8,7 +8,7 @@ public class CanvasManager : MonoBehaviour
     public GameObject UIcontainer;
     public BrushPaletteUI brushPalette;
     public Drawable drawingCanvas;
-    public Drawer drawingAgent;
+    Drawer drawingAgent;
 
     void Start()
     {

@@ -54,11 +54,10 @@ public class Drawer : MonoBehaviour
                     if (drawingCanvas != null)
                     {
                         drawpos = new Vector2Int();
-                        drawpos.x = (int)(hit.textureCoord.x * drawingCanvas.GetTextureSize());
-                        drawpos.y = (int)(hit.textureCoord.y * drawingCanvas.GetTextureSize());
+                        drawpos.x = (int)(hit.textureCoord.x * drawingCanvas.GetTextureSizeX());
+                        drawpos.y = (int)(hit.textureCoord.y * drawingCanvas.GetTextureSizeY());
                         AddDrawPositions(drawpos);
                         //drawingCanvas.SetPixels(drawpos.x, drawpos.y);
-                        //Debug.Log("Hello world");
                     }
                 }
             }
