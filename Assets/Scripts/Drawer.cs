@@ -5,7 +5,7 @@ using System;
 
 public class Drawer : MonoBehaviour
 {
-    Drawable drawingCanvas; //the gameobject having drawable component is where something is to be drawn
+    public Drawable drawingCanvas; //the gameobject having drawable component is where something is to be drawn
     Vector2Int drawpos; //brush position on canvas where to draw
 
     //use a queue to save the points where to draw so that a smooth interpolation can be done between the recorded points
@@ -18,10 +18,30 @@ public class Drawer : MonoBehaviour
     [SerializeField]
     float drawInterval = 0.02f; //the interval of time(in seconds) after which to periodically set pixels of the canvas 
 
+    delegate void setPixelForCanvas(int x, int y);
+    setPixelForCanvas canvasDrawOrEraseAt;
+    bool erase;   //brush operation whether to erase or draw
+
     // Start is called before the first frame update
     void Start()
     {
         StartCoroutine(DrawToCanvas());
+        erase = false; //set the default brush operation to draw not erase
+    }
+
+    public void setBrushEraser(bool erasing)
+    {
+        erase = erasing;
+    }
+
+    private void setBrushToEraseorDraw(bool erase)
+    {
+        if (drawingCanvas == null)
+            return;
+        if (erase)
+        { canvasDrawOrEraseAt = drawingCanvas.erasePixels; }
+        else
+        { canvasDrawOrEraseAt = drawingCanvas.SetPixels; }
     }
 
     public void SetInterpolationPixelCount(int brushSize)
@@ -57,6 +77,7 @@ public class Drawer : MonoBehaviour
                         drawpos.x = (int)(hit.textureCoord.x * drawingCanvas.GetTextureSizeX());
                         drawpos.y = (int)(hit.textureCoord.y * drawingCanvas.GetTextureSizeY());
                         AddDrawPositions(drawpos);
+                        setBrushToEraseorDraw(erase);
                         //drawingCanvas.SetPixels(drawpos.x, drawpos.y);
                     }
                 }
@@ -97,11 +118,11 @@ public class Drawer : MonoBehaviour
 
         for(int k=0; k < steps; k += interpolationPixelCount)
         {
-            drawingCanvas.SetPixels((int)Math.Round(x), (int)Math.Round(y));
+            canvasDrawOrEraseAt((int)Math.Round(x), (int)Math.Round(y));
             x += xinc;
             y += yinc;
         }
-        drawingCanvas.SetPixels(endPos.x, endPos.y);
+        canvasDrawOrEraseAt(endPos.x, endPos.y);
     }
 
     void AddDrawPositions(Vector2Int newDrawPos)
