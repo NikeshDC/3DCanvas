@@ -5,7 +5,7 @@ using System;
 
 public class Drawer : MonoBehaviour
 {
-    Drawable drawingCanvas; //the gameobject having drawable component is where something is to be drawn
+    public Drawable drawingCanvas; //the gameobject having drawable component is where something is to be drawn
     Vector2Int drawpos; //brush position on canvas where to draw
 
     //use a queue to save the points where to draw so that a smooth interpolation can be done between the recorded points
@@ -18,10 +18,23 @@ public class Drawer : MonoBehaviour
     [SerializeField]
     float drawInterval = 0.02f; //the interval of time(in seconds) after which to periodically set pixels of the canvas 
 
+    delegate void setPixelForCanvas(int x, int y);
+    setPixelForCanvas canvasDrawOrEraseAt;
+
     // Start is called before the first frame update
     void Start()
     {
         StartCoroutine(DrawToCanvas());
+    }
+
+    public void setBrushToEraseorDraw(bool erase)
+    {
+        if (drawingCanvas == null)
+            return;
+        if (erase)
+        { canvasDrawOrEraseAt = drawingCanvas.erasePixels; }
+        else
+        { canvasDrawOrEraseAt = drawingCanvas.SetPixels; }
     }
 
     public void SetInterpolationPixelCount(int brushSize)

@@ -10,6 +10,8 @@ public class Drawable : MonoBehaviour
     /*naming convention:- 'brush' is what is used to draw and 'canvas' is where it is drawn
      * ignore comments strting with //**
      */
+    private Texture2D originalTexture;
+
     public enum BrushType { Square, Circle }; //possible types of brushes to use while drawing
 
     public BrushType brushType = BrushType.Square; //the current selected brushtype to use while drawing
@@ -45,12 +47,13 @@ public class Drawable : MonoBehaviour
         {
             if (canvasRenderer.material.mainTexture is Texture2D)
             {
-                Texture2D existingTexture = (Texture2D)canvasRenderer.material.mainTexture;
-                textureSizeX = existingTexture.width;
-                textureSizeY = existingTexture.height;
-                canvasTexture = new Texture2D(existingTexture.width, existingTexture.height);
-                canvasTexture.SetPixels32(existingTexture.GetPixels32());
+                originalTexture = (Texture2D)canvasRenderer.material.mainTexture;
+                textureSizeX = originalTexture.width;
+                textureSizeY = originalTexture.height;
+                canvasTexture = new Texture2D(originalTexture.width, originalTexture.height);
+                canvasTexture.SetPixels32(originalTexture.GetPixels32());
                 canvasTexture.Apply();
+                
             }
             else
                 Debug.LogError("Provided texture is not of type Texture2D");
@@ -69,7 +72,6 @@ public class Drawable : MonoBehaviour
     {
         return brushSize;
     }
-
 
     public void SetBrushSize(float scale)
     {//sets brush size within the minimum and maximum range specified by 'scale'
@@ -168,6 +170,42 @@ public class Drawable : MonoBehaviour
             }
         }
 
+        canvasUpdateRequired = true;
+    }
+
+    public void erasePixels(int x, int y)
+    {//uses the same brush as painting brush to set the texture to that of original
+        if (originalTexture == null)
+            return;
+        int pixx, pixy;
+        foreach (Vector2Int brushCoord in brushCoords)
+        {
+            pixx = brushCoord.x + x;
+            pixy = brushCoord.y + y;
+            if (pixx >= 0 && pixy >= 0 && pixx < textureSizeX && pixy < textureSizeY)
+            {
+                canvasTexture.SetPixel(pixx, pixy, originalTexture.GetPixel(pixx, pixy));
+                //**Debug.Log("Pixel set at ("+pixx+", "+pixy+")");
+            }
+        }
+        canvasUpdateRequired = true;
+    }
+
+    public void erasePixels()
+    {//uses the same brush as painting brush to set the texture to that of original
+        if (originalTexture == null)
+            return;
+        int pixx, pixy;
+        foreach (Vector2Int brushCoord in brushCoords)
+        {
+            pixx = brushCoord.x + brushPosition.x;
+            pixy = brushCoord.y + brushPosition.y;
+            if (pixx >= 0 && pixy >= 0 && pixx < textureSizeX && pixy < textureSizeY)
+            {
+                canvasTexture.SetPixel(pixx, pixy, originalTexture.GetPixel(pixx, pixy));
+                //**Debug.Log("Pixel set at ("+pixx+", "+pixy+")");
+            }
+        }
         canvasUpdateRequired = true;
     }
 
