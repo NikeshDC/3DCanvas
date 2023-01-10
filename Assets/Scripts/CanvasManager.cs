@@ -22,6 +22,11 @@ public class CanvasManager : MonoBehaviour
         drawingAgent.drawingCanvas.brushColor = brushPalette.GetColor();
     }
 
+    public void setBrush_erasing(bool erase)
+    {
+        drawingAgent.setBrushEraser(erase);
+    }
+
     public void SetBrushGreen(float _g)
     {
         if (drawingAgent.drawingCanvas == null)

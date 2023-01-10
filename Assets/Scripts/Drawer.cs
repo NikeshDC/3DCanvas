@@ -20,14 +20,21 @@ public class Drawer : MonoBehaviour
 
     delegate void setPixelForCanvas(int x, int y);
     setPixelForCanvas canvasDrawOrEraseAt;
+    bool erase;   //brush operation whether to erase or draw
 
     // Start is called before the first frame update
     void Start()
     {
         StartCoroutine(DrawToCanvas());
+        erase = false; //set the default brush operation to draw not erase
     }
 
-    public void setBrushToEraseorDraw(bool erase)
+    public void setBrushEraser(bool erasing)
+    {
+        erase = erasing;
+    }
+
+    private void setBrushToEraseorDraw(bool erase)
     {
         if (drawingCanvas == null)
             return;
@@ -70,6 +77,7 @@ public class Drawer : MonoBehaviour
                         drawpos.x = (int)(hit.textureCoord.x * drawingCanvas.GetTextureSizeX());
                         drawpos.y = (int)(hit.textureCoord.y * drawingCanvas.GetTextureSizeY());
                         AddDrawPositions(drawpos);
+                        setBrushToEraseorDraw(erase);
                         //drawingCanvas.SetPixels(drawpos.x, drawpos.y);
                     }
                 }
@@ -110,11 +118,11 @@ public class Drawer : MonoBehaviour
 
         for(int k=0; k < steps; k += interpolationPixelCount)
         {
-            drawingCanvas.SetPixels((int)Math.Round(x), (int)Math.Round(y));
+            canvasDrawOrEraseAt((int)Math.Round(x), (int)Math.Round(y));
             x += xinc;
             y += yinc;
         }
-        drawingCanvas.SetPixels(endPos.x, endPos.y);
+        canvasDrawOrEraseAt(endPos.x, endPos.y);
     }
 
     void AddDrawPositions(Vector2Int newDrawPos)
